@@ -1,0 +1,25 @@
+{
+  "name": "tictactoe-multiplayer",
+  "version": "1.0.0",
+  "description": "Multiplayer Tic-Tac-Toe game with Nakama",
+  "scripts": {
+    "setup": "cd backend && npm install && npm run build && cd ../frontend && npm install",
+    "backend:build": "cd backend && npm run build",
+    "backend:dev": "cd backend && npm run dev",
+    "frontend:dev": "cd frontend && npm run dev",
+    "frontend:build": "cd frontend && npm run build",
+    "docker:up": "cd docker && docker-compose up -d",
+    "docker:down": "cd docker && docker-compose down",
+    "docker:logs": "cd docker && docker-compose logs -f",
+    "start": "npm run docker:up && npm run frontend:dev"
+  },
+  "keywords": [
+    "tic-tac-toe",
+    "multiplayer",
+    "nakama",
+    "react",
+    "typescript"
+  ],
+  "author": "",
+  "license": "MIT"
+}

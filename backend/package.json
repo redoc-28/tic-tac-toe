@@ -1,0 +1,15 @@
+{
+  "name": "tictactoe-backend",
+  "version": "1.0.0",
+  "description": "Nakama server modules for multiplayer Tic-Tac-Toe",
+  "main": "build/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "typescript": "^5.4.3"
+  },
+  "dependencies": {}
+}

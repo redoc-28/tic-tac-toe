@@ -1,0 +1,117 @@
+import {
+  moduleName,
+  matchInit,
+  matchJoinAttempt,
+  matchJoin,
+  matchLeave,
+  matchLoop,
+  matchTerminate,
+  matchSignal,
+} from './tictactoe_match';
+
+// Initialize module - called when Nakama starts
+function InitModule(
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  initializer: nkruntime.Initializer
+) {
+  logger.info('TicTacToe module loaded');
+
+  // Register match handler
+  initializer.registerMatch(moduleName, {
+    matchInit,
+    matchJoinAttempt,
+    matchJoin,
+    matchLeave,
+    matchLoop,
+    matchTerminate,
+    matchSignal,
+  });
+
+  // Register RPC to create a new match
+  initializer.registerRpc('create_match', rpcCreateMatch);
+
+  // Register RPC to find an open match
+  initializer.registerRpc('find_match', rpcFindMatch);
+
+  logger.info('TicTacToe RPCs registered');
+}
+
+// RPC: Create a new match
+const rpcCreateMatch: nkruntime.RpcFunction = function (
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  payload: string
+): string {
+  logger.info('Creating new match');
+
+  try {
+    const matchId = nk.matchCreate(moduleName, {});
+    logger.info(`Match created: ${matchId}`);
+
+    return JSON.stringify({
+      matchId,
+    });
+  } catch (error) {
+    logger.error('Error creating match: ' + error);
+    throw error;
+  }
+};
+
+// RPC: Find an existing open match or create a new one
+const rpcFindMatch: nkruntime.RpcFunction = function (
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  payload: string
+): string {
+  logger.info('Finding match');
+
+  try {
+    // List matches with the TicTacToe label
+    const matches = nk.matchList(10, true, '', 0, 100, '');
+
+    logger.info(`Found ${matches.length} matches`);
+
+    // Find an open match
+    for (const match of matches) {
+      try {
+        // Skip if label is not set or empty
+        if (!match.label || !match.label.value) {
+          continue;
+        }
+
+        const label = JSON.parse(match.label.value);
+
+        // Check if match is open and has space
+        if (label.open && match.size < 2) {
+          logger.info(`Found open match: ${match.matchId}`);
+          return JSON.stringify({
+            matchId: match.matchId,
+          });
+        }
+      } catch (err) {
+        // Skip matches with invalid labels
+        logger.warn(`Skipping match ${match.matchId} with invalid label`);
+        continue;
+      }
+    }
+
+    // No open match found, create a new one
+    logger.info('No open match found, creating new match');
+    const matchId = nk.matchCreate(moduleName, {});
+
+    return JSON.stringify({
+      matchId,
+    });
+  } catch (error) {
+    logger.error('Error finding match: ' + error);
+    throw error;
+  }
+};
+
+// Module entry point
+// @ts-ignore
+!InitModule && InitModule.bind(null);

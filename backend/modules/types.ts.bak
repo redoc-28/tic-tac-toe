@@ -1,0 +1,38 @@
+// Game state types
+export interface GameState {
+  board: (string | null)[];
+  currentPlayer: string;
+  players: {
+    [userId: string]: {
+      presence: nkruntime.Presence;
+      mark: 'X' | 'O';
+    };
+  };
+  status: 'waiting' | 'active' | 'finished';
+  winner: string | null;
+  winningLine: number[] | null;
+  isDraw: boolean;
+}
+
+export interface MoveMessage {
+  position: number;
+}
+
+export interface StateUpdateMessage {
+  board: (string | null)[];
+  currentPlayer: string;
+  status: string;
+  winner: string | null;
+  winningLine: number[] | null;
+  isDraw: boolean;
+  playerX: string | null;
+  playerO: string | null;
+}
+
+export const OpCodes = {
+  MOVE: 1,
+  STATE_UPDATE: 2,
+  PLAYER_JOINED: 3,
+  PLAYER_LEFT: 4,
+  GAME_OVER: 5,
+};

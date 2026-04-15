@@ -1,0 +1,321 @@
+import { GameState, MoveMessage, StateUpdateMessage, OpCodes } from './types';
+
+const moduleName = 'TicTacToeMatch';
+
+// Winning combinations for Tic-Tac-Toe
+const WINNING_COMBINATIONS = [
+  [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+  [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+  [0, 4, 8], [2, 4, 6]              // Diagonals
+];
+
+const matchInit: nkruntime.MatchInitFunction<GameState> = function (
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  params: { [key: string]: string }
+): { state: GameState; tickRate: number; label: string } {
+
+  logger.info('Match initialized');
+
+  const initialState: GameState = {
+    board: Array(9).fill(null),
+    currentPlayer: '',
+    players: {},
+    status: 'waiting',
+    winner: null,
+    winningLine: null,
+    isDraw: false,
+  };
+
+  const label = JSON.stringify({
+    name: 'Tic-Tac-Toe',
+    open: true,
+  });
+
+  return {
+    state: initialState,
+    tickRate: 1, // 1 tick per second
+    label,
+  };
+};
+
+const matchJoinAttempt: nkruntime.MatchJoinAttemptFunction<GameState> = function (
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  dispatcher: nkruntime.MatchDispatcher,
+  tick: number,
+  state: GameState,
+  presence: nkruntime.Presence,
+  metadata: { [key: string]: any }
+): { state: GameState; accept: boolean; rejectMessage?: string } | null {
+
+  logger.info(`Join attempt by user: ${presence.userId}`);
+
+  // Don't allow more than 2 players
+  if (Object.keys(state.players).length >= 2) {
+    return {
+      state,
+      accept: false,
+      rejectMessage: 'Match is full',
+    };
+  }
+
+  // Don't allow joining if game is already finished
+  if (state.status === 'finished') {
+    return {
+      state,
+      accept: false,
+      rejectMessage: 'Game is already finished',
+    };
+  }
+
+  return {
+    state,
+    accept: true,
+  };
+};
+
+const matchJoin: nkruntime.MatchJoinFunction<GameState> = function (
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  dispatcher: nkruntime.MatchDispatcher,
+  tick: number,
+  state: GameState,
+  presences: nkruntime.Presence[]
+): { state: GameState } | null {
+
+  for (const presence of presences) {
+    logger.info(`Player joined: ${presence.userId}`);
+
+    // Assign X or O to the player
+    const playerCount = Object.keys(state.players).length;
+    const mark = playerCount === 0 ? 'X' : 'O';
+
+    state.players[presence.userId] = {
+      presence,
+      mark,
+    };
+
+    // Broadcast player joined
+    const message = JSON.stringify({
+      type: 'player_joined',
+      userId: presence.userId,
+      username: presence.username,
+      mark,
+    });
+    dispatcher.broadcastMessage(OpCodes.PLAYER_JOINED, message);
+  }
+
+  // Start game if we have 2 players
+  if (Object.keys(state.players).length === 2) {
+    state.status = 'active';
+    // Player X always starts
+    state.currentPlayer = Object.keys(state.players).find(
+      (userId) => state.players[userId].mark === 'X'
+    )!;
+
+    logger.info('Game started');
+    broadcastState(dispatcher, state);
+  }
+
+  return { state };
+};
+
+const matchLeave: nkruntime.MatchLeaveFunction<GameState> = function (
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  dispatcher: nkruntime.MatchDispatcher,
+  tick: number,
+  state: GameState,
+  presences: nkruntime.Presence[]
+): { state: GameState } | null {
+
+  for (const presence of presences) {
+    logger.info(`Player left: ${presence.userId}`);
+
+    delete state.players[presence.userId];
+
+    // If a player leaves during an active game, the other player wins
+    if (state.status === 'active' && Object.keys(state.players).length === 1) {
+      const remainingPlayer = Object.keys(state.players)[0];
+      state.winner = remainingPlayer;
+      state.status = 'finished';
+
+      const message = JSON.stringify({
+        type: 'player_left',
+        winner: remainingPlayer,
+      });
+      dispatcher.broadcastMessage(OpCodes.PLAYER_LEFT, message);
+      broadcastState(dispatcher, state);
+    }
+  }
+
+  return { state };
+};
+
+const matchLoop: nkruntime.MatchLoopFunction<GameState> = function (
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  dispatcher: nkruntime.MatchDispatcher,
+  tick: number,
+  state: GameState,
+  messages: nkruntime.MatchMessage[]
+): { state: GameState } | null {
+
+  for (const message of messages) {
+    switch (message.opCode) {
+      case OpCodes.MOVE:
+        state = handleMove(logger, nk, dispatcher, state, message);
+        break;
+    }
+  }
+
+  return { state };
+};
+
+const matchTerminate: nkruntime.MatchTerminateFunction<GameState> = function (
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  dispatcher: nkruntime.MatchDispatcher,
+  tick: number,
+  state: GameState,
+  graceSeconds: number
+): { state: GameState } | null {
+
+  logger.info('Match terminated');
+  return { state };
+};
+
+const matchSignal: nkruntime.MatchSignalFunction<GameState> = function (
+  ctx: nkruntime.Context,
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  dispatcher: nkruntime.MatchDispatcher,
+  tick: number,
+  state: GameState,
+  data: string
+): { state: GameState; data?: string } | null {
+
+  logger.info('Match signal received: ' + data);
+  return { state };
+};
+
+// Helper function to handle player moves
+function handleMove(
+  logger: nkruntime.Logger,
+  nk: nkruntime.Nakama,
+  dispatcher: nkruntime.MatchDispatcher,
+  state: GameState,
+  message: nkruntime.MatchMessage
+): GameState {
+
+  const sender = message.sender;
+
+  // Validate game is active
+  if (state.status !== 'active') {
+    logger.warn('Move attempted but game is not active');
+    return state;
+  }
+
+  // Validate it's the player's turn
+  if (sender.userId !== state.currentPlayer) {
+    logger.warn(`Invalid turn: ${sender.userId} tried to move but it's ${state.currentPlayer}'s turn`);
+    return state;
+  }
+
+  // Parse move
+  const moveData: MoveMessage = JSON.parse(nk.binaryToString(message.data));
+  const position = moveData.position;
+
+  // Validate position
+  if (position < 0 || position > 8) {
+    logger.warn(`Invalid position: ${position}`);
+    return state;
+  }
+
+  // Validate cell is empty
+  if (state.board[position] !== null) {
+    logger.warn(`Cell already occupied: ${position}`);
+    return state;
+  }
+
+  // Make the move
+  const playerMark = state.players[sender.userId].mark;
+  state.board[position] = playerMark;
+
+  logger.info(`Player ${sender.userId} (${playerMark}) moved to position ${position}`);
+
+  // Check for winner
+  const winResult = checkWinner(state.board);
+  if (winResult.winner) {
+    state.winner = sender.userId;
+    state.winningLine = winResult.line;
+    state.status = 'finished';
+    logger.info(`Game over! Winner: ${sender.userId}`);
+  }
+  // Check for draw
+  else if (state.board.every((cell) => cell !== null)) {
+    state.isDraw = true;
+    state.status = 'finished';
+    logger.info('Game over! Draw');
+  }
+  // Switch turns
+  else {
+    const playerIds = Object.keys(state.players);
+    state.currentPlayer = playerIds.find((id) => id !== state.currentPlayer)!;
+  }
+
+  // Broadcast updated state
+  broadcastState(dispatcher, state);
+
+  return state;
+}
+
+// Helper function to check for a winner
+function checkWinner(board: (string | null)[]): { winner: string | null; line: number[] | null } {
+  for (const combination of WINNING_COMBINATIONS) {
+    const [a, b, c] = combination;
+    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+      return { winner: board[a], line: combination };
+    }
+  }
+  return { winner: null, line: null };
+}
+
+// Helper function to broadcast game state
+function broadcastState(dispatcher: nkruntime.MatchDispatcher, state: GameState) {
+  const playerIds = Object.keys(state.players);
+  const playerX = playerIds.find((id) => state.players[id].mark === 'X') || null;
+  const playerO = playerIds.find((id) => state.players[id].mark === 'O') || null;
+
+  const stateUpdate: StateUpdateMessage = {
+    board: state.board,
+    currentPlayer: state.currentPlayer,
+    status: state.status,
+    winner: state.winner,
+    winningLine: state.winningLine,
+    isDraw: state.isDraw,
+    playerX,
+    playerO,
+  };
+
+  const message = JSON.stringify(stateUpdate);
+  dispatcher.broadcastMessage(OpCodes.STATE_UPDATE, message);
+}
+
+export {
+  moduleName,
+  matchInit,
+  matchJoinAttempt,
+  matchJoin,
+  matchLeave,
+  matchLoop,
+  matchTerminate,
+  matchSignal,
+};
