@@ -5,6 +5,8 @@ interface LoadingProps {
   submessage?: string;
   variant?: 'primary' | 'secondary' | 'multi';
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  showCancel?: boolean;
+  onCancel?: () => void;
 }
 
 export default function Loading({
@@ -12,41 +14,80 @@ export default function Loading({
   submessage,
   variant = 'primary',
   size = 'md',
+  showCancel = false,
+  onCancel,
 }: LoadingProps) {
-  const sizeClasses = {
-    sm: 'w-12 h-12',
-    md: 'w-20 h-20',
-    lg: 'w-24 h-24',
-    xl: 'w-32 h-32',
+  const containerStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '48px 24px',
+    textAlign: 'center',
+    minHeight: '300px',
   };
 
-  const iconSizes = {
-    sm: 'w-8 h-8',
-    md: 'w-16 h-16',
-    lg: 'w-20 h-20',
-    xl: 'w-24 h-24',
+  const sizes: Record<string, number> = {
+    sm: 48,
+    md: 72,
+    lg: 96,
+    xl: 120,
   };
 
-  const textSizes = {
-    sm: 'text-base',
-    md: 'text-xl',
-    lg: 'text-2xl',
-    xl: 'text-3xl',
-  };
+  const spinnerSize = sizes[size];
 
-  const renderLoadingAnimation = () => {
+  const renderSpinner = () => {
     if (variant === 'multi') {
       return (
-        <div className={`relative ${sizeClasses[size]} mx-auto mb-8`}>
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full opacity-20 blur-2xl animate-pulse"></div>
-          <div className="relative w-full h-full flex items-center justify-center">
-            <Icons.Search className={`${iconSizes[size]} text-purple-600 animate-pulse`} />
-            <div className="absolute inset-0 border-4 border-purple-300 rounded-full"></div>
-            <div className="absolute inset-0 border-4 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
-            <div
-              className="absolute inset-4 border-4 border-pink-300 border-b-transparent rounded-full animate-spin"
-              style={{ animationDirection: 'reverse', animationDuration: '1s' }}
-            ></div>
+        <div style={{
+          position: 'relative',
+          width: spinnerSize,
+          height: spinnerSize,
+          margin: '0 auto 32px',
+        }}>
+          {/* Outer glow */}
+          <div style={{
+            position: 'absolute',
+            inset: '-20px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, rgba(45, 212, 168, 0.15), transparent 70%)',
+          }} className="animate-glow-pulse" />
+
+          {/* Outer ring */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '50%',
+            border: '3px solid rgba(45, 212, 168, 0.15)',
+          }} />
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '50%',
+            border: '3px solid transparent',
+            borderTopColor: '#2dd4a8',
+          }} className="animate-spin-slow" />
+
+          {/* Inner ring */}
+          <div style={{
+            position: 'absolute',
+            inset: '12px',
+            borderRadius: '50%',
+            border: '3px solid transparent',
+            borderBottomColor: 'rgba(45, 212, 168, 0.5)',
+          }} className="animate-spin-reverse" />
+
+          {/* Center icon */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}>
+            <Icons.Search
+              className={`text-[#2dd4a8]`}
+            />
           </div>
         </div>
       );
@@ -54,44 +95,124 @@ export default function Loading({
 
     if (variant === 'secondary') {
       return (
-        <div className={`relative ${sizeClasses[size]} mx-auto mb-6`}>
-          <div className="absolute inset-0 rounded-full border-4 border-indigo-200"></div>
-          <div className="absolute inset-0 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin"></div>
+        <div style={{
+          position: 'relative',
+          width: spinnerSize,
+          height: spinnerSize,
+          margin: '0 auto 32px',
+        }}>
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '50%',
+            border: '3px solid rgba(45, 212, 168, 0.12)',
+          }} />
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            borderRadius: '50%',
+            border: '3px solid transparent',
+            borderTopColor: '#2dd4a8',
+          }} className="animate-spin-slow" />
         </div>
       );
     }
 
     // Primary variant
     return (
-      <div className={`relative ${sizeClasses[size]} mx-auto mb-8`}>
-        <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full opacity-20 blur-xl animate-pulse"></div>
-        <div className="relative flex items-center justify-center w-full h-full">
-          <Icons.Spinner className={`${iconSizes[size]} text-indigo-600`} />
+      <div style={{
+        position: 'relative',
+        width: spinnerSize,
+        height: spinnerSize,
+        margin: '0 auto 32px',
+      }}>
+        <div style={{
+          position: 'absolute',
+          inset: '-16px',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(45, 212, 168, 0.12), transparent 70%)',
+        }} className="animate-glow-pulse" />
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+          <Icons.Spinner className={`text-[#2dd4a8]`} style={{ width: spinnerSize * 0.7, height: spinnerSize * 0.7 } as React.CSSProperties} />
         </div>
       </div>
     );
   };
 
   return (
-    <div className="text-center py-12">
-      {renderLoadingAnimation()}
-      <h2 className={`${textSizes[size]} font-bold text-gray-800 mb-2`}>{message}</h2>
-      {submessage && <p className="text-gray-500">{submessage}</p>}
+    <div style={containerStyle}>
+      {renderSpinner()}
+
+      <h2 style={{
+        fontSize: size === 'xl' ? '28px' : size === 'lg' ? '24px' : size === 'md' ? '20px' : '16px',
+        fontWeight: 700,
+        color: '#e8edf2',
+        marginBottom: '8px',
+        fontFamily: "'Space Grotesk', 'Inter', sans-serif",
+        letterSpacing: '-0.01em',
+      }}>
+        {message}
+      </h2>
+
+      {submessage && (
+        <p style={{
+          color: '#5b6f80',
+          fontSize: '14px',
+          marginTop: '4px',
+          lineHeight: 1.5,
+        }}>
+          {submessage}
+        </p>
+      )}
+
       {variant === 'multi' && (
-        <div className="flex justify-center gap-2 mt-4">
-          <span
-            className="w-2 h-2 bg-purple-600 rounded-full animate-bounce"
-            style={{ animationDelay: '0ms' }}
-          ></span>
-          <span
-            className="w-2 h-2 bg-purple-600 rounded-full animate-bounce"
-            style={{ animationDelay: '150ms' }}
-          ></span>
-          <span
-            className="w-2 h-2 bg-purple-600 rounded-full animate-bounce"
-            style={{ animationDelay: '300ms' }}
-          ></span>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '6px',
+          marginTop: '24px',
+        }}>
+          {[0, 1, 2].map((i) => (
+            <span
+              key={i}
+              style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                backgroundColor: '#2dd4a8',
+                display: 'block',
+                animation: `bounce-dot 1.2s ease-in-out ${i * 0.16}s infinite`,
+              }}
+            />
+          ))}
         </div>
+      )}
+
+      {showCancel && onCancel && (
+        <button
+          onClick={onCancel}
+          style={{
+            marginTop: '32px',
+            padding: '10px 28px',
+            background: 'rgba(255, 255, 255, 0.06)',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            borderRadius: '10px',
+            color: '#8899a6',
+            fontSize: '14px',
+            fontWeight: 600,
+            cursor: 'pointer',
+            transition: 'all 0.2s',
+            fontFamily: "'Inter', sans-serif",
+          }}
+        >
+          Cancel
+        </button>
       )}
     </div>
   );

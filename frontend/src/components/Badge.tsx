@@ -17,30 +17,71 @@ export default function Badge({
   pulse = false,
   className = '',
 }: BadgeProps) {
-  const baseClasses = 'inline-flex items-center gap-2 font-semibold rounded-full shadow-lg';
-
-  const variantClasses = {
-    primary: 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white',
-    success: 'bg-gradient-to-r from-green-500 to-emerald-600 text-white',
-    danger: 'bg-gradient-to-r from-red-500 to-pink-600 text-white',
-    warning: 'bg-gradient-to-r from-yellow-400 to-orange-500 text-white',
-    info: 'bg-gradient-to-r from-blue-500 to-cyan-600 text-white',
-    gray: 'bg-gradient-to-r from-gray-400 to-gray-500 text-white',
+  const baseStyles: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '8px',
+    fontWeight: 700,
+    borderRadius: '999px',
+    fontFamily: "'Inter', sans-serif",
+    letterSpacing: '0.02em',
   };
 
-  const sizeClasses = {
-    sm: 'px-3 py-1 text-xs',
-    md: 'px-5 py-2 text-sm',
-    lg: 'px-6 py-3 text-base',
+  const variantStyles: Record<string, React.CSSProperties> = {
+    primary: {
+      background: 'rgba(45, 212, 168, 0.15)',
+      color: '#2dd4a8',
+      border: '1px solid rgba(45, 212, 168, 0.3)',
+      boxShadow: '0 0 20px rgba(45, 212, 168, 0.1)',
+    },
+    success: {
+      background: 'rgba(45, 212, 168, 0.15)',
+      color: '#2dd4a8',
+      border: '1px solid rgba(45, 212, 168, 0.3)',
+      boxShadow: '0 0 20px rgba(45, 212, 168, 0.15)',
+    },
+    danger: {
+      background: 'rgba(239, 68, 68, 0.15)',
+      color: '#ef4444',
+      border: '1px solid rgba(239, 68, 68, 0.3)',
+      boxShadow: '0 0 20px rgba(239, 68, 68, 0.1)',
+    },
+    warning: {
+      background: 'rgba(251, 191, 36, 0.15)',
+      color: '#fbbf24',
+      border: '1px solid rgba(251, 191, 36, 0.3)',
+      boxShadow: '0 0 20px rgba(251, 191, 36, 0.1)',
+    },
+    info: {
+      background: 'rgba(59, 130, 246, 0.15)',
+      color: '#3b82f6',
+      border: '1px solid rgba(59, 130, 246, 0.3)',
+    },
+    gray: {
+      background: 'rgba(136, 153, 166, 0.12)',
+      color: '#8899a6',
+      border: '1px solid rgba(136, 153, 166, 0.2)',
+    },
   };
 
-  const pulseClass = pulse ? 'animate-pulse' : '';
+  const sizeStyles: Record<string, React.CSSProperties> = {
+    sm: { padding: '4px 12px', fontSize: '12px' },
+    md: { padding: '6px 16px', fontSize: '14px' },
+    lg: { padding: '10px 24px', fontSize: '16px' },
+  };
+
+  const combinedStyles: React.CSSProperties = {
+    ...baseStyles,
+    ...variantStyles[variant],
+    ...sizeStyles[size],
+  };
 
   return (
     <span
-      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]} ${pulseClass} ${className}`}
+      style={combinedStyles}
+      className={`${pulse ? 'animate-pulse-glow' : ''} ${className}`}
     >
-      {icon && <span className="flex-shrink-0">{icon}</span>}
+      {icon && <span style={{ display: 'flex', flexShrink: 0 }}>{icon}</span>}
       {children}
     </span>
   );

@@ -41,17 +41,30 @@ var rpcFindMatch = function (ctx: nkruntime.Context, logger: nkruntime.Logger, n
     for (var i = 0; i < matches.length; i++) {
       var match = matches[i];
       try {
-        if (!match.label || !match.label.value) {
+        // Log match details for debugging
+        logger.info('Checking match ' + match.matchId + ' | size: ' + match.size + ' | label: ' + (match.label || 'no label'));
+
+        if (!match.label) {
+          logger.warn('Match ' + match.matchId + ' has no label');
           continue;
         }
 
-        var label = JSON.parse(match.label.value);
+        // Parse label - it might be a string or an object with value property
+        var labelStr = typeof match.label === 'string' ? match.label : match.label.value;
+        if (!labelStr) {
+          logger.warn('Match ' + match.matchId + ' has empty label');
+          continue;
+        }
+
+        var label = JSON.parse(labelStr);
+        logger.info('Match ' + match.matchId + ' parsed label: open=' + label.open + ', size=' + match.size);
+
         if (label.open && match.size < 2) {
           logger.info('Found open match: ' + match.matchId);
           return JSON.stringify({ matchId: match.matchId });
         }
       } catch (err) {
-        logger.warn('Skipping match ' + match.matchId + ' with invalid label');
+        logger.warn('Skipping match ' + match.matchId + ' with invalid label: ' + err);
         continue;
       }
     }
@@ -174,7 +187,13 @@ var matchJoin = function (ctx: nkruntime.Context, logger: nkruntime.Logger, nk: 
         break;
       }
     }
-    logger.info('Game started');
+    logger.info('Game started with 2 players');
+
+    // Update label to mark match as closed (no longer open for joining)
+    var newLabel = JSON.stringify({ name: 'Tic-Tac-Toe', open: false });
+    dispatcher.matchLabelUpdate(newLabel);
+    logger.info('Match marked as closed');
+
     broadcastState(dispatcher, state);
   }
 
@@ -227,6 +246,7 @@ var matchLoop = function (ctx: nkruntime.Context, logger: nkruntime.Logger, nk: 
       state.board[position] = playerMark;
 
       logger.info('Player ' + sender.userId + ' (' + playerMark + ') moved to position ' + position);
+      logger.info('Board state after move: ' + JSON.stringify(state.board));
 
       var winResult = checkWinner(state.board);
       if (winResult.winner) {

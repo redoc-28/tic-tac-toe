@@ -6,6 +6,9 @@ class NakamaService {
   private socket: Socket | null = null;
   private session: Session | null = null;
   private matchId: string | null = null;
+  private matchDataCallback: ((state: GameState) => void) | null = null;
+  private playerJoinedCallback: ((data: { userId: string; username: string; mark: 'X' | 'O' }) => void) | null = null;
+  private playerLeftCallback: ((data: { winner: string }) => void) | null = null;
 
   async connect(): Promise<void> {
     const host = import.meta.env.VITE_NAKAMA_HOST || 'localhost';
@@ -25,7 +28,45 @@ class NakamaService {
     this.socket = this.client.createSocket(useSSL, false);
     await this.socket.connect(this.session);
 
+    // Set up unified match data handler
+    this.setupMatchDataHandler();
+
     console.log('Socket connected');
+  }
+
+  private setupMatchDataHandler(): void {
+    if (!this.socket) return;
+
+    this.socket.onmatchdata = (matchData) => {
+      console.log('Match data received - OpCode:', matchData.op_code);
+
+      try {
+        const decodedData = new TextDecoder().decode(matchData.data);
+        console.log('Decoded data:', decodedData);
+
+        if (matchData.op_code === OpCodes.STATE_UPDATE) {
+          const state: GameState = JSON.parse(decodedData);
+          console.log('Parsed game state:', state);
+          if (this.matchDataCallback) {
+            this.matchDataCallback(state);
+          }
+        } else if (matchData.op_code === OpCodes.PLAYER_JOINED) {
+          const data = JSON.parse(decodedData);
+          console.log('Player joined:', data);
+          if (this.playerJoinedCallback) {
+            this.playerJoinedCallback(data);
+          }
+        } else if (matchData.op_code === OpCodes.PLAYER_LEFT) {
+          const data = JSON.parse(decodedData);
+          console.log('Player left:', data);
+          if (this.playerLeftCallback) {
+            this.playerLeftCallback(data);
+          }
+        }
+      } catch (error) {
+        console.error('Error processing match data:', error);
+      }
+    };
   }
 
   private getOrCreateDeviceId(): string {
@@ -107,46 +148,17 @@ class NakamaService {
   onMatchData(
     callback: (state: GameState) => void
   ): void {
-    if (!this.socket) {
-      throw new Error('Socket not connected');
-    }
-
-    this.socket.onmatchdata = (matchData) => {
-      if (matchData.op_code === OpCodes.STATE_UPDATE) {
-        const state: GameState = JSON.parse(
-          new TextDecoder().decode(matchData.data)
-        );
-        callback(state);
-      }
-    };
+    this.matchDataCallback = callback;
   }
 
   onPlayerJoined(
     callback: (data: { userId: string; username: string; mark: 'X' | 'O' }) => void
   ): void {
-    if (!this.socket) {
-      throw new Error('Socket not connected');
-    }
-
-    this.socket.onmatchdata = (matchData) => {
-      if (matchData.op_code === OpCodes.PLAYER_JOINED) {
-        const data = JSON.parse(new TextDecoder().decode(matchData.data));
-        callback(data);
-      }
-    };
+    this.playerJoinedCallback = callback;
   }
 
   onPlayerLeft(callback: (data: { winner: string }) => void): void {
-    if (!this.socket) {
-      throw new Error('Socket not connected');
-    }
-
-    this.socket.onmatchdata = (matchData) => {
-      if (matchData.op_code === OpCodes.PLAYER_LEFT) {
-        const data = JSON.parse(new TextDecoder().decode(matchData.data));
-        callback(data);
-      }
-    };
+    this.playerLeftCallback = callback;
   }
 
   getSession(): Session | null {
