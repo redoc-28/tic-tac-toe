@@ -139,7 +139,7 @@ export default function Loading({
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-          <Icons.Spinner className={`text-[#2dd4a8]`} style={{ width: spinnerSize * 0.7, height: spinnerSize * 0.7 } as React.CSSProperties} />
+          <Icons.Spinner className={`text-[#2dd4a8]`} style={{ width: spinnerSize * 0.7, height: spinnerSize * 0.7 }} />
         </div>
       </div>
     );

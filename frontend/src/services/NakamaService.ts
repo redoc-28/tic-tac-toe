@@ -26,7 +26,7 @@ class NakamaService {
 
     // Create socket connection
     this.socket = this.client.createSocket(useSSL, false);
-    await this.socket.connect(this.session);
+    await this.socket.connect(this.session, true);
 
     // Set up unified match data handler
     this.setupMatchDataHandler();
@@ -91,13 +91,16 @@ class NakamaService {
       throw new Error('Not connected');
     }
 
-    const result = await this.client.rpc(this.session, 'find_match', '{}');
+    const result = await this.client.rpc(this.session, 'find_match', {});
     const data = typeof result.payload === 'string'
       ? JSON.parse(result.payload)
       : result.payload;
     this.matchId = data.matchId;
 
     console.log('Match found:', this.matchId);
+    if (!this.matchId) {
+      throw new Error('Match ID not found in response');
+    }
     return this.matchId;
   }
 
@@ -106,13 +109,16 @@ class NakamaService {
       throw new Error('Not connected');
     }
 
-    const result = await this.client.rpc(this.session, 'create_match', '{}');
+    const result = await this.client.rpc(this.session, 'create_match', {});
     const data = typeof result.payload === 'string'
       ? JSON.parse(result.payload)
       : result.payload;
     this.matchId = data.matchId;
 
     console.log('Match created:', this.matchId);
+    if (!this.matchId) {
+      throw new Error('Match ID not found in response');
+    }
     return this.matchId;
   }
 

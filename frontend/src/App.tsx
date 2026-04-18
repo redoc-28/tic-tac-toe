@@ -36,7 +36,7 @@ function App() {
     try {
       await NakamaService.connect();
       const session = NakamaService.getSession();
-      if (session) {
+      if (session?.user_id) {
         setUserId(session.user_id);
       }
 
@@ -171,7 +171,7 @@ function App() {
                 justifyContent: 'center',
                 margin: '0 auto 20px',
               }}>
-                <Icons.Users className="w-7 h-7" style={{ color: '#2dd4a8' } as React.CSSProperties} />
+                <Icons.Users className="w-7 h-7" style={{ color: '#2dd4a8' }} />
               </div>
               <h2 style={{
                 fontSize: '24px',
@@ -273,7 +273,7 @@ function App() {
                   justifyContent: 'center',
                   boxShadow: '0 8px 32px rgba(45, 212, 168, 0.3)',
                 }}>
-                  <Icons.Grid className="w-10 h-10" style={{ color: '#0f1923' } as React.CSSProperties} />
+                  <Icons.Grid className="w-10 h-10" style={{ color: '#0f1923' }} />
                 </div>
               </div>
 
@@ -297,9 +297,9 @@ function App() {
                 justifyContent: 'center',
                 gap: '6px',
               }}>
-                <Icons.Lightning className="w-4 h-4" style={{ color: '#2dd4a8' } as React.CSSProperties} />
+                <Icons.Lightning className="w-4 h-4" style={{ color: '#2dd4a8' }} />
                 <span>Real-time Multiplayer</span>
-                <Icons.Lightning className="w-4 h-4" style={{ color: '#2dd4a8' } as React.CSSProperties} />
+                <Icons.Lightning className="w-4 h-4" style={{ color: '#2dd4a8' }} />
               </p>
             </div>
 
@@ -367,7 +367,7 @@ function App() {
                   gap: '8px',
                   marginBottom: '8px',
                 }}>
-                  <Icons.Shield className="w-4 h-4" style={{ color: '#2dd4a8' } as React.CSSProperties} />
+                  <Icons.Shield className="w-4 h-4" style={{ color: '#2dd4a8' }} />
                   <span style={{ fontSize: '12px', color: '#5b6f80', fontWeight: 600, textTransform: 'uppercase' as const, letterSpacing: '0.06em' }}>
                     Active Match ID
                   </span>
@@ -506,7 +506,7 @@ function App() {
               alignItems: 'center',
               justifyContent: 'center',
             }}>
-              <Icons.Warning className="w-10 h-10" style={{ color: '#ef4444' } as React.CSSProperties} />
+              <Icons.Warning className="w-10 h-10" style={{ color: '#ef4444' }} />
             </div>
 
             <div>

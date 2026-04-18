@@ -67,7 +67,7 @@ export default function GameBoard({ gameState, currentUserId, onCellClick }: Gam
             justifyContent: 'center',
             border: playerX === currentUserId ? '1px solid rgba(45, 212, 168, 0.3)' : '1px solid transparent',
           }}>
-            <Icons.XMark className="w-5 h-5" style={{ color: '#2dd4a8' } as React.CSSProperties} />
+            <Icons.XMark className="w-5 h-5" style={{ color: '#2dd4a8' }} />
           </div>
           <div>
             <div style={{
@@ -107,8 +107,8 @@ export default function GameBoard({ gameState, currentUserId, onCellClick }: Gam
                   : '1px solid rgba(255,255,255,0.08)',
               }}>
                 {myMark === 'X'
-                  ? <Icons.XMark className="w-3.5 h-3.5" style={{ color: '#2dd4a8' } as React.CSSProperties} />
-                  : <Icons.OMark className="w-3.5 h-3.5" style={{ color: '#ef4444' } as React.CSSProperties} />
+                  ? <Icons.XMark className="w-3.5 h-3.5" style={{ color: '#2dd4a8' }} />
+                  : <Icons.OMark className="w-3.5 h-3.5" style={{ color: '#ef4444' }} />
                 }
               </div>
               <span style={{
@@ -179,7 +179,7 @@ export default function GameBoard({ gameState, currentUserId, onCellClick }: Gam
             justifyContent: 'center',
             border: playerO === currentUserId ? '1px solid rgba(239, 68, 68, 0.3)' : '1px solid transparent',
           }}>
-            <Icons.OMark className="w-5 h-5" style={{ color: '#ef4444' } as React.CSSProperties} />
+            <Icons.OMark className="w-5 h-5" style={{ color: '#ef4444' }} />
           </div>
         </div>
       </div>
@@ -306,7 +306,7 @@ export default function GameBoard({ gameState, currentUserId, onCellClick }: Gam
                           color: '#0a1015',
                           strokeWidth: '4',
                           filter: isWin ? 'drop-shadow(0 0 12px rgba(10, 16, 21, 0.6))' : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))',
-                        } as React.CSSProperties}
+                        }}
                       />
                     ) : (
                       <Icons.OMark
@@ -315,7 +315,7 @@ export default function GameBoard({ gameState, currentUserId, onCellClick }: Gam
                           color: '#ffffff',
                           strokeWidth: '4',
                           filter: isWin ? 'drop-shadow(0 0 12px rgba(255, 255, 255, 0.8))' : 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3))',
-                        } as React.CSSProperties}
+                        }}
                       />
                     )}
                   </div>
@@ -349,7 +349,7 @@ export default function GameBoard({ gameState, currentUserId, onCellClick }: Gam
           }}>
             {winner === currentUserId ? (
               <>
-                <Icons.Crown className="w-8 h-8" style={{ color: '#fbbf24' } as React.CSSProperties} />
+                <Icons.Crown className="w-8 h-8" style={{ color: '#fbbf24' }} />
                 <span style={{
                   fontSize: '28px',
                   fontWeight: 900,

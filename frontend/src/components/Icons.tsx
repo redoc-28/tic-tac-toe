@@ -1,14 +1,14 @@
 // Reusable SVG Icons Component
 export const Icons = {
   // Game Icons
-  XMark: ({ className = "w-6 h-6" }: { className?: string }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+  XMark: ({ className = "w-6 h-6", style }: { className?: string; style?: React.CSSProperties }) => (
+    <svg className={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M6 18L18 6M6 6l12 12" />
     </svg>
   ),
 
-  OMark: ({ className = "w-6 h-6" }: { className?: string }) => (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
+  OMark: ({ className = "w-6 h-6", style }: { className?: string; style?: React.CSSProperties }) => (
+    <svg className={className} style={style} viewBox="0 0 24 24" fill="none" stroke="currentColor" xmlns="http://www.w3.org/2000/svg">
       <circle cx="12" cy="12" r="8" strokeWidth={4} />
     </svg>
   ),
@@ -57,20 +57,20 @@ export const Icons = {
     </svg>
   ),
 
-  Lightning: ({ className = "w-6 h-6" }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  Lightning: ({ className = "w-6 h-6", style }: { className?: string; style?: React.CSSProperties }) => (
+    <svg className={className} style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
     </svg>
   ),
 
-  Warning: ({ className = "w-6 h-6" }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  Warning: ({ className = "w-6 h-6", style }: { className?: string; style?: React.CSSProperties }) => (
+    <svg className={className} style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
     </svg>
   ),
 
-  Users: ({ className = "w-6 h-6" }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  Users: ({ className = "w-6 h-6", style }: { className?: string; style?: React.CSSProperties }) => (
+    <svg className={className} style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
     </svg>
   ),
@@ -82,16 +82,16 @@ export const Icons = {
   ),
 
   // Loading Spinner
-  Spinner: ({ className = "w-6 h-6" }: { className?: string }) => (
-    <svg className={`animate-spin ${className}`} fill="none" viewBox="0 0 24 24">
+  Spinner: ({ className = "w-6 h-6", style }: { className?: string; style?: React.CSSProperties }) => (
+    <svg className={`animate-spin ${className}`} style={style} fill="none" viewBox="0 0 24 24">
       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
     </svg>
   ),
 
   // Grid/Game Board Icon
-  Grid: ({ className = "w-6 h-6" }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  Grid: ({ className = "w-6 h-6", style }: { className?: string; style?: React.CSSProperties }) => (
+    <svg className={className} style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" />
     </svg>
   ),
@@ -111,8 +111,8 @@ export const Icons = {
   ),
 
   // Crown for winner
-  Crown: ({ className = "w-6 h-6" }: { className?: string }) => (
-    <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+  Crown: ({ className = "w-6 h-6", style }: { className?: string; style?: React.CSSProperties }) => (
+    <svg className={className} style={style} fill="currentColor" viewBox="0 0 24 24">
       <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" />
     </svg>
   ),
@@ -125,8 +125,8 @@ export const Icons = {
   ),
 
   // Shield
-  Shield: ({ className = "w-6 h-6" }: { className?: string }) => (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  Shield: ({ className = "w-6 h-6", style }: { className?: string; style?: React.CSSProperties }) => (
+    <svg className={className} style={style} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
     </svg>
   ),
